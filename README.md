@@ -69,3 +69,135 @@ package.json에 아래 코드 추가
   }
 
 ```
+
+### 소스예시
+
+Task.tsx
+
+```
+import React from "react";
+
+export type TaskProps = {
+  /** Composition of the task */
+  task: {
+    /** Id of the task */
+    id: string;
+    /** Title of the task */
+    title: string;
+    /** Current state of the task */
+    state: string;
+    updatedAt: Date;
+  };
+  /** Event to change the task to archived */
+  onArchiveTask?: (id: string) => void;
+  /** Event to change the task to pinned */
+  onPinTask?: (id: string) => void;
+};
+
+const Task = ({
+  task: { id, title, state },
+  onArchiveTask,
+  onPinTask,
+}: TaskProps) => {
+  return (
+    <div className={`list-item ${state}`}>
+      <label className="checkbox">
+        <input
+          type="checkbox"
+          defaultChecked={state === "TASK_ARCHIVED"}
+          disabled={true}
+          name="checked"
+        />
+        <span
+          className="checkbox-custom"
+          onClick={
+            onArchiveTask
+              ? () => onArchiveTask(id)
+              : (e) => {
+                  e.preventDefault();
+                }
+          }
+        />
+      </label>
+      <div className="title">
+        <input
+          type="text"
+          value={title}
+          readOnly={true}
+          placeholder="Input title"
+        />
+      </div>
+
+      <div className="actions" onClick={(event) => event.stopPropagation()}>
+        {state !== "TASK_ARCHIVED" && (
+          // eslint-disable-next-line jsx-a11y/anchor-is-valid
+          <a
+            onClick={
+              onPinTask
+                ? () => onPinTask(id)
+                : (e) => {
+                    e.preventDefault();
+                  }
+            }
+          >
+            <span className={`icon-star`} />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Task;
+
+```
+
+Task.stories.tsx
+
+```
+import { ComponentMeta, ComponentStory } from "@storybook/react";
+import React from "react";
+import Task from "./Task";
+
+export default {
+  title: "Task",
+  component: Task,
+} as ComponentMeta<typeof Task>;
+
+const Template: ComponentStory<typeof Task> = (args) => <Task {...args} />;
+
+export const Default = Template.bind({});
+Default.args = {
+  task: {
+    id: "1",
+    title: "Test Task",
+    state: "TASK_INBOX",
+    updatedAt: new Date(2018, 0, 1, 9, 0),
+  },
+};
+
+export const Pinned = Template.bind({});
+Pinned.args = {
+  task: {
+    id: "1",
+    title: "Test Task",
+    state: "TASK_PINNED",
+    updatedAt: new Date(2018, 0, 1, 9, 0),
+  },
+};
+
+export const Archived = Template.bind({});
+Archived.args = {
+  task: {
+    id: "1",
+    title: "Test Task",
+    state: "TASK_ARCHIVED",
+    updatedAt: new Date(2018, 0, 1, 9, 0),
+  },
+};
+
+```
+
+## 스냅샷 테스트
+
+스냅샷 테스트는 어떤 기능의 예상 결과를 미리 정확히 포착해두고 실제 결과에 비교하는 테스트 기법.
