@@ -1,15 +1,25 @@
 import React from "react";
 
 import Task, { TaskProps } from "./Task";
+import { connect, ConnectedProps } from "react-redux";
+import { archiveTask, pinTask, TaskState } from "../lib/redux";
 
-export type TaskListProps = {
+export interface TaskListProps extends PropsFromRedux {
+  /** Checks if it's in loading state */
   loading?: boolean;
+  /** The list of tasks */
   tasks: TaskProps["task"][];
-  onPinTask?: () => void;
-  onArchiveTask?: () => void;
+  /** Event to change the task to pinned */
+  onPinTask: (id: string) => { type: string; id: string };
+  /** Event to change the task to archived */
+  onArchiveTask: (id: string) => { type: string; id: string };
+}
+
+PureTaskList.defaultProps = {
+  loading: false,
 };
 
-export default function TaskList({
+export function PureTaskList({
   loading,
   tasks,
   onPinTask,
@@ -19,6 +29,11 @@ export default function TaskList({
     onPinTask,
     onArchiveTask,
   };
+
+  const tasksInOrder = [
+    ...tasks.filter((t) => t.state === "TASK_PINNED"),
+    ...tasks.filter((t) => t.state !== "TASK_PINNED"),
+  ];
 
   const LoadingRow = (
     <div className="loading-item">
@@ -54,11 +69,6 @@ export default function TaskList({
     );
   }
 
-  const tasksInOrder = [
-    ...tasks.filter((t) => t.state === "TASK_PINNED"),
-    ...tasks.filter((t) => t.state !== "TASK_PINNED"),
-  ];
-
   return (
     <div className="list-items">
       {tasksInOrder.map((task) => (
@@ -67,3 +77,16 @@ export default function TaskList({
     </div>
   );
 }
+const mapState = ({ tasks }: TaskState) => ({
+  tasks: tasks.filter(
+    (t) => t.state === "TASK_INBOX" || t.state === "TASK_PINNED"
+  ),
+});
+const mapDispatch = {
+  onArchiveTask: (id: string) => archiveTask(id),
+  onPinTask: (id: string) => pinTask(id),
+};
+const connector = connect(mapState, mapDispatch);
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(PureTaskList);

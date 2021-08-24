@@ -9,7 +9,7 @@ export type TaskProps = {
     title: string;
     /** Current state of the task */
     state: string;
-    updatedAt: Date;
+    updatedAt?: Date;
   };
   /** Event to change the task to archived */
   onArchiveTask?: (id: string) => void;
