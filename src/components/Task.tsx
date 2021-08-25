@@ -48,7 +48,7 @@ const Task = ({
           value={title}
           readOnly={true}
           placeholder="Input title"
-          style={{ background: "red" }}
+          style={{ background: "blue" }}
         />
       </div>
 
